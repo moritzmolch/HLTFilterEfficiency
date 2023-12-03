@@ -1,0 +1,18 @@
+<use name="CommonTools/UtilAlgos"/>
+<use name="DataFormats/Common"/>
+<use name="DataFormats/MuonReco"/>
+<use name="DataFormats/L1Trigger"/>
+<use name="DataFormats/TrackReco"/>
+<use name="DataFormats/Math"/>
+<use name="DataFormats/HepMCCandidate"/>
+<use name="DataFormats/PatCandidates"/>
+<use name="FWCore/Common"/>
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ServiceRegistry"/>
+<use name="HLTrigger/HLTcore"/>
+<use name="SimTracker/Records"/>
+<library file="HLTFilterEfficiencyAnalyzer.cc" name="HLTFilterEfficiencyAnalyzer">
+  <flags EDM_PLUGIN="1"/>
+</library>
