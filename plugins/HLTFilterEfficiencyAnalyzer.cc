@@ -182,7 +182,6 @@ class HLTEventAnalyzer: public edm::one::EDAnalyzer<edm::one::WatchRuns, edm::on
         unsigned int runIndex_;
         std::vector<std::string> hltPaths_;
         HLTHistogramCollection hltHistograms_;
-
 };
 
 
@@ -255,14 +254,10 @@ void HLTEventAnalyzer::beginRun(const edm::Run& run, const edm::EventSetup& setu
 }
 
 
-void HLTEventAnalyzer::endRun(const edm::Run& run, const edm::EventSetup& setup) {
-
-    // empty the old filter list and re-set the event count
-}
+void HLTEventAnalyzer::endRun(const edm::Run& run, const edm::EventSetup& setup) {}
 
 
 void HLTEventAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-
     /**
     if (sample_ == "sim") {
         edm::Handle<reco::GenParticleCollection> genParticles;
@@ -310,9 +305,6 @@ void HLTEventAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
 
         hltHistograms_.fill(hltPath, runIndex_, lastFilter, hltState);
     }
-
-    // increase event count for the current run
-
 }
 
 
