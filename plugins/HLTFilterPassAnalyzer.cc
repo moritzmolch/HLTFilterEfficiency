@@ -91,6 +91,7 @@ void HLTFilterPassAnalyzer::endJob() {
     for (HLTHistogramStore::StoreIterator it = histStore_.begin(); it != histStore_.end(); ++it) {
         shared_ptr<HLTFilterPassHistogram> h = *it;
         fs_->make<TH1D>(h->getTH1D());
+        fs_->make<TH1D>(h->getTH1DSaveTags());
     }
 }
 
@@ -121,6 +122,7 @@ void HLTFilterPassAnalyzer::beginRun(const Run& run, const EventSetup& setup) {
 
         if ( ! histStore_.contains(hltPath) ) {
             shared_ptr<HLTFilterPassHistogram> hist = make_shared<HLTFilterPassHistogram>(hltPath, hltConfig_.moduleLabels(hltPath));
+            hist->SetFilterNamesSaveTags(hltConfig_.saveTagsModules(hltPath));
             histStore_.put(hltPath, hist);
         }
 

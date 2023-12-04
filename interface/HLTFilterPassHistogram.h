@@ -35,11 +35,22 @@ public:
     // getter method for the name
     const std::string& name();
 
+    // set filters that have saveTags = True
+    void SetFilterNamesSaveTags(const vector<string>&);
+
     // fill the filter cutflow histogram with one event.
     void fill(const std::string& filterNameLastRun, const bool& hasPassedFilterLastRun);
 
-    // get the underlying TH1D object
-    const TH1D& getTH1D();
+    // get a copy of the underlying TH1D object
+    const TH1D getTH1D();
+
+    // get a copy of the underlying TH1D object with selected bins
+    const TH1D getTH1D(const vector<string>&, const std::string&);
+
+    // get a copy of the underlying TH1D object with selected bins
+    const TH1D getTH1DSaveTags();
+
+
 
 private:
 
@@ -48,6 +59,9 @@ private:
 
     // list of all filter names
     vector<string> filterNames_;
+
+    // list of all filter names with saveTags = True
+    vector<string> filterNamesSaveTags_;
 
     // map of the filter names to the bin index in the histogram
     map<string, int> filterBinIndices_;
