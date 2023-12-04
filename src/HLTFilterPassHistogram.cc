@@ -49,6 +49,14 @@ HLTFilterPassHistogram::HLTFilterPassHistogram(const string& name, const vector<
 
 
 /**
+ * Get the name of this histogram, which corresponds to the name of the full HLT path.
+ */
+const std::string& HLTFilterPassHistogram::name() {
+    return name_;
+}
+
+
+/**
  * Fill the filter cutflow histogram with one event.
  * 
  * The method receives the name of the last filter that has been run in the HLT path as well as information about the state of the last filter, i.e. if the event has passed the filter or not. This information is used to increase the bin count of all bins up to the last passed filter by 1.
@@ -69,6 +77,14 @@ void HLTFilterPassHistogram::fill(const string& filterNameLastRun, const bool& h
     for (int i = 1; i <= lastBinIndex; ++i) {
         hist_.AddBinContent(i);
     }
+}
+
+
+/**
+ * Get the underlying ``ROOT::TH1D`` object.
+ */
+const TH1D& HLTFilterPassHistogram::getTH1D() {
+    return hist_;
 }
 
 
