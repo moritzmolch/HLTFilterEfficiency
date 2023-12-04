@@ -35,8 +35,11 @@ public:
     // getter method for the name
     const std::string& name();
 
-    // Fill the filter cutflow histogram with one event.
+    // fill the filter cutflow histogram with one event.
     void fill(const std::string& filterNameLastRun, const bool& hasPassedFilterLastRun);
+
+    // get the underlying TH1D object
+    const TH1D& getTH1D();
 
 private:
 
