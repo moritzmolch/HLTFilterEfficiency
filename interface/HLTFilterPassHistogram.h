@@ -32,6 +32,9 @@ public:
     // constructor with HLT path name and list of filters
     HLTFilterPassHistogram(const string&, const vector<string>&);
 
+    // getter method for the name
+    const std::string& name();
+
     // Fill the filter cutflow histogram with one event.
     void fill(const std::string& filterNameLastRun, const bool& hasPassedFilterLastRun);
 
