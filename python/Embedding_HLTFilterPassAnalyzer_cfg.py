@@ -8,11 +8,11 @@ hlt_paths = [
 ]
 
 
-process = cms.Process("HLTFilterEfficiencyAnalyzer")
+process = cms.Process("HLTFilterPassAnalyzer")
 
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(100))
 
 
 process.source = cms.Source(
@@ -53,8 +53,8 @@ process.source = cms.Source(
 )
 
 
-process.hltFilterEfficiencyAnalyzer = cms.EDAnalyzer(
-    "HLTFilterEfficiencyAnalyzer",
+process.hltFilterPassAnalyzer = cms.EDAnalyzer(
+    "HLTFilterPassAnalyzer",
     hlt_paths=cms.untracked.vstring(*hlt_paths),
     results=cms.InputTag("TriggerResults", "", "SIMembeddingHLT"),
     prescales=cms.InputTag("patTrigger", "", "MERGE"),
@@ -62,8 +62,8 @@ process.hltFilterEfficiencyAnalyzer = cms.EDAnalyzer(
 
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("histos.root")
+    fileName = cms.string("TauAnalysis/HLTFilterEfficiency/histos.root")
 )
 
 
-process.p = cms.Path(process.hltFilterEfficiencyAnalyzer)
+process.p = cms.Path(process.hltFilterPassAnalyzer)
