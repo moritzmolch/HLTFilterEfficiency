@@ -1,8 +1,9 @@
 // system include files
 
-#include <memory>
 #include <cmath>
-
+#include <memory>
+#include <string>
+#include <vector>
 
 // user include files
 
@@ -30,15 +31,25 @@ class DrellYanGenTauTauFilter : public one::EDFilter<one::SharedResources> {
         explicit DrellYanGenTauTauFilter(const ParameterSet&);
         ~DrellYanGenTauTauFilter() {}
 
+        enum class TauDecayMode {
+            El = 11,
+            Mu = 13,
+            Tau = 15,
+            Unknown = 0,
+        };
+
     private:
         bool filter(edm::Event&, const edm::EventSetup &);
+        DrellYanGenTauTauFilter::TauDecayMode getTauDecayMode(const shared_ptr<GenParticle>);
 
         EDGetTokenT<GenParticleCollection> genParticles_;
+        string finalState_;
 };
 
 
 DrellYanGenTauTauFilter::DrellYanGenTauTauFilter(const ParameterSet& iConfig) {
     genParticles_ = consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genparticles"));
+    finalState_ = iConfig.getUntrackedParameter<string>("finalState", finalState_);
 }
 
 
@@ -51,7 +62,7 @@ bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
     bool isZTauTau = false;
 
     // candidate taus from the Z -> tau tau decay 
-    //vector<Candidate&> tauCandidates = vector<Candidate&>();
+    vector<shared_ptr<GenParticle>> tauCandidates = vector<shared_ptr<GenParticle>>();
 
     // iterate through the collection of generator-level particles
     for (size_t i = 0; i < genParticles->size(); ++i) {
@@ -60,7 +71,7 @@ bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
         const GenParticle& zBoson = (*genParticles)[i];
 
         // clear list of tau candidates for each new Z boson candidate
-        //tauCandidates.clear();
+        tauCandidates.clear();
 
         // if this is not a Z boson (PDG ID 23), skip this particle
         if (abs(zBoson.pdgId()) != 23) {
@@ -72,10 +83,11 @@ bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
         size_t nDaughter = static_cast<size_t>(zBoson.numberOfDaughters());
         unsigned int nTaus = 0;
         for (size_t j = 0; j < nDaughter; ++j) {
-            const Candidate* d = zBoson.daughter(j);
-            if (abs(d->pdgId()) == 15) {
+            const Candidate* cand = zBoson.daughter(j);
+            const GenParticle* daughter = dynamic_cast<const GenParticle*>(cand);
+            if (abs(daughter->pdgId()) == 15) {
                 nTaus += 1;
-                //tauCandidates.push_back(d);
+                tauCandidates.push_back(make_shared<GenParticle>(*daughter));
             }
         }
 
@@ -87,17 +99,81 @@ bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
 
     }
 
-    std::cout << isZTauTau << std::endl;
+    if (finalState_ == "all") {
+        return isZTauTau;
+    }
 
-    return isZTauTau;
+    // investigate the tau tau final state
+    vector<DrellYanGenTauTauFilter::TauDecayMode> tauDecayModes = vector<DrellYanGenTauTauFilter::TauDecayMode>();
+    for (const shared_ptr<GenParticle> tauCand : tauCandidates) {
+        tauDecayModes.push_back(getTauDecayMode(tauCand));
+    }
 
-    // if this is not a Z -> tau tau event, it is skipped
-    //if (!isZTauTau) {
-    //    return false;
-    //}
 
-    // further investigate the tau tau final state
+    string finalStateName = "unknown";
+    vector<pair<int, int>> indexPairs = vector<pair<int, int>>();
+    indexPairs.push_back(pair<int, int>(0, 1));
+    indexPairs.push_back(pair<int, int>(1, 0));
+    for (const pair<int, int>& indexPair : indexPairs) {
+        int i = indexPair.first;
+        int j = indexPair.second;
+        if (tauDecayModes.at(i) == DrellYanGenTauTauFilter::TauDecayMode::El && tauDecayModes.at(j) == DrellYanGenTauTauFilter::TauDecayMode::Tau) {
+            finalStateName = "ElTau";
+            break;
+        } else if (tauDecayModes.at(i) == DrellYanGenTauTauFilter::TauDecayMode::Mu && tauDecayModes.at(j) == DrellYanGenTauTauFilter::TauDecayMode::Tau) {
+            finalStateName = "MuTau";
+            break;
+        } else if (tauDecayModes.at(i) == DrellYanGenTauTauFilter::TauDecayMode::El && tauDecayModes.at(j) == DrellYanGenTauTauFilter::TauDecayMode::Mu) {
+            finalStateName = "ElMu";
+            break;
+        } else if (tauDecayModes.at(i) == DrellYanGenTauTauFilter::TauDecayMode::Tau && tauDecayModes.at(j) == DrellYanGenTauTauFilter::TauDecayMode::Tau) {
+            finalStateName = "TauTau";
+            break;
+        } else if (tauDecayModes.at(i) == DrellYanGenTauTauFilter::TauDecayMode::El && tauDecayModes.at(j) == DrellYanGenTauTauFilter::TauDecayMode::El) {
+            finalStateName = "ElEl";
+            break;
+        } else if (tauDecayModes.at(i) == DrellYanGenTauTauFilter::TauDecayMode::Mu && tauDecayModes.at(j) == DrellYanGenTauTauFilter::TauDecayMode::Mu) {
+            finalStateName = "MuMu";
+            break;
+        }
+    }
 
+    std::cout << "UNKNOWN FINAL STATE!" << std::endl;
+
+    return isZTauTau && (finalState_ == finalStateName);
+}
+
+
+DrellYanGenTauTauFilter::TauDecayMode DrellYanGenTauTauFilter::getTauDecayMode(const shared_ptr<GenParticle> tauCandidate) {
+    int eNeutrinos = 0;
+    int muNeutrinos = 0;
+    int tauNeutrinos = 0;
+    size_t nDaughters = static_cast<size_t>(tauCandidate->numberOfDaughters());
+    for (size_t i = 0; i < nDaughters; ++i) {
+        const Candidate* cand = tauCandidate->daughter(i);
+        const GenParticle* d = dynamic_cast<const GenParticle*>(cand);
+        const shared_ptr<GenParticle> daughter = make_shared<GenParticle>(*d);
+
+        if (daughter->pdgId() == tauCandidate->pdgId()) {
+            return DrellYanGenTauTauFilter::getTauDecayMode(daughter);
+        } else if (abs(daughter->pdgId()) == 12) {
+            eNeutrinos += 1;
+        } else if (abs(daughter->pdgId()) == 14) {
+            muNeutrinos += 1;
+        } else if (abs(daughter->pdgId()) == 16) {
+            tauNeutrinos += 1;
+        }
+    }
+
+    if (tauNeutrinos == 1 && eNeutrinos == 1 && muNeutrinos == 0) {
+        return DrellYanGenTauTauFilter::TauDecayMode::El;
+    } else if (tauNeutrinos == 1 && eNeutrinos == 0 && muNeutrinos == 1) {
+        return DrellYanGenTauTauFilter::TauDecayMode::Mu;
+    } else if (tauNeutrinos == 1 && eNeutrinos == 0 && muNeutrinos == 0) {
+        return DrellYanGenTauTauFilter::TauDecayMode::Tau;
+    } else {
+        return DrellYanGenTauTauFilter::TauDecayMode::Unknown;
+    }
 }
 
 
