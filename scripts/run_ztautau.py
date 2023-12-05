@@ -1,3 +1,4 @@
+import glob
 import random
 import os
 import subprocess
@@ -9,7 +10,7 @@ SAMPLE_DATABASE_PATH = os.path.abspath(os.path.join(__file__, "..", "..", "data"
 OUTPUT_PATH = os.path.abspath(os.path.join(__file__, "..", "..", "store", "HLTFilterPassAnalyzer"))
 
 
-N_FILES = 30
+N_FILES = 10
 
 
 HLT_PATHS = {
@@ -34,13 +35,13 @@ HLT_PATHS = {
 }
 
 
-def get_filelist(era, sub_era, final_state, n_files=None):
-    sample_file = os.path.join(
+def get_filelist(era, n_files=None):
+    sample_file = list(glob.glob(os.path.join(
         SAMPLE_DATABASE_PATH,
         era,
-        "embedding",
-        "TauEmbedding-" + final_state + "FinalState_Run" + era + sub_era + "-UL" + era + ".yaml"
-    )
+        "dyjets",
+        "*.yaml"
+    )))[0]
     with open(sample_file, mode="r") as f:
         sample = yaml.safe_load(f)
 
@@ -51,16 +52,16 @@ def get_filelist(era, sub_era, final_state, n_files=None):
     return filelist
 
 
-def run(era, sub_era, final_state, n_files=None):
-    filelist = get_filelist(era, sub_era, final_state, n_files=n_files)
+def run(era, final_state, n_files=None):
+    filelist = get_filelist(era, n_files=n_files)
     input_files = ",".join(filelist)
-    output_file = os.path.join(OUTPUT_PATH, "TauEmbedding-" + final_state + "FinalState_Run" + era + sub_era + ".root")
+    output_file = os.path.join(OUTPUT_PATH, "ZTauTau-" + final_state + "FinalState_Run" + era + ".root")
     if not os.path.exists(os.path.dirname(output_file)):
         os.makedirs(os.path.dirname(output_file))
     output_file = "file://" + output_file
     hlt_paths = ",".join(HLT_PATHS[final_state])
     p = subprocess.Popen(
-        "cmsRun ${CMSSW_BASE}/src/TauAnalysis/HLTFilterEfficiency/python/HLTFilterPassAnalyzer_cfg.py inputFiles=" + input_files + " outputFile=" + output_file + " hltPaths=" + hlt_paths,
+        "cmsRun ${CMSSW_BASE}/src/TauAnalysis/HLTFilterEfficiency/python/DrellYanTauTauGenFilter_HLTFilterPassAnalyzer_cfg.py inputFiles=" + input_files + " outputFile=" + output_file + " hltPaths=" + hlt_paths + " finalState=" + final_state,
         stdout=sys.stdout,
         stderr=sys.stdout,
         shell=True,
@@ -73,6 +74,4 @@ def run(era, sub_era, final_state, n_files=None):
 for final_state in ["TauTau", "ElTau", "MuTau"]:
 
     for era in ["2017", ]:
-
-        for sub_era in ["B", "C", "D", "E", "F"]:
-            run(era, sub_era, final_state, n_files=N_FILES)
+        run(era, final_state, n_files=N_FILES)
