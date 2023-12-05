@@ -56,7 +56,7 @@ process.source = cms.Source(
 process.drellYanGenTauTauFilter = cms.EDFilter(
     "DrellYanGenTauTauFilter",
     genparticles=cms.InputTag("prunedGenParticles", "", "PAT"),
-    finalState=cms.untracked.string("all"),
+    finalState=cms.untracked.string(options.finalState),
 )
 
 
