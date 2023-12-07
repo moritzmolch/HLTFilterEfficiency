@@ -84,7 +84,6 @@ bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
                 } else if (nTaus == 2) {
                     genDecayMode2 = getTauDecayMode(daughter);
                 }
-                std::cout << genDecayMode1 << " " << genDecayMode2 << std::endl;
 
             }
         }
@@ -139,7 +138,7 @@ bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
         std::cout << "WARNING: UNKNOWN FINAL STATE!" << std::endl;
     }
 
-    return (finalState_ == finalStateName);
+    return isZTauTau && (finalState_ == finalStateName);
 }
 
 
