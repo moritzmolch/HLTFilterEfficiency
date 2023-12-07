@@ -1,7 +1,7 @@
 /**
  * Store for cutflow-like histogram for filter sequence in a HLT path.
  *
- * Implementation of ``TauAnalysis/HLTFilterEfficiency/interface/HLTHistogramStore.h``.
+ * Implementation of ``TauAnalysis/HLTFilterEfficiencyStudies/interface/HLTHistogramStore.h``.
  * 
  * \date  2023-12-04
  * \author Moritz Molch <moritz.molch@kit.edu>
@@ -14,8 +14,8 @@
 
 #include "TH1.h"
 
-#include "TauAnalysis/HLTFilterEfficiency/interface/HLTFilterPassHistogram.h"
-#include "TauAnalysis/HLTFilterEfficiency/interface/HLTHistogramStore.h"
+#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/HLTFilterPassHistogram.h"
+#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/HLTHistogramStore.h"
 
 
 using namespace std;

@@ -1,7 +1,7 @@
 /**
  * Cutflow-like histogram for filter sequence in a HLT path.
  *
- * Implementation of ``TauAnalysis/HLTFilterEfficiency/interface/HLTFilterPassHistogram.h``.
+ * Implementation of ``TauAnalysis/HLTFilterEfficiencyStudies/interface/HLTFilterPassHistogram.h``.
  * 
  * \date  2023-12-04
  * \author Moritz Molch <moritz.molch@kit.edu>
@@ -13,7 +13,7 @@
 
 #include "TH1.h"
 
-#include "TauAnalysis/HLTFilterEfficiency/interface/HLTFilterPassHistogram.h"
+#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/HLTFilterPassHistogram.h"
 
 
 using namespace std;

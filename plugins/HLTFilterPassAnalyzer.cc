@@ -22,8 +22,8 @@
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
-#include "TauAnalysis/HLTFilterEfficiency/interface/HLTFilterPassHistogram.h"
-#include "TauAnalysis/HLTFilterEfficiency/interface/HLTHistogramStore.h"
+#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/HLTFilterPassHistogram.h"
+#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/HLTHistogramStore.h"
 
 
 using namespace edm;
@@ -45,7 +45,7 @@ class HLTFilterPassAnalyzer: public one::EDAnalyzer<one::WatchRuns, one::SharedR
         virtual void beginRun(const Run&, const EventSetup&) override;
         virtual void endRun(const Run&, const EventSetup&) override;
         virtual void analyze(const Event&, const EventSetup&) override;
-        bool isSelectedHLTPath(const string& path);
+        const bool isSelectedHLTPath(const string& path);
 
         HLTConfigProvider hltConfig_;
 
@@ -83,19 +83,6 @@ void HLTFilterPassAnalyzer::fillDescriptions(ConfigurationDescriptions& descript
 }
 
 
-void HLTFilterPassAnalyzer::beginJob() {}
-
-
-void HLTFilterPassAnalyzer::endJob() {
-
-    for (HLTHistogramStore::StoreIterator it = histStore_.begin(); it != histStore_.end(); ++it) {
-        shared_ptr<HLTFilterPassHistogram> h = *it;
-        fs_->make<TH1D>(h->getTH1D());
-        fs_->make<TH1D>(h->getTH1DSaveTags());
-    }
-}
-
-
 void HLTFilterPassAnalyzer::beginRun(const Run& run, const EventSetup& setup) {
 
     bool changed = true;
@@ -118,10 +105,15 @@ void HLTFilterPassAnalyzer::beginRun(const Run& run, const EventSetup& setup) {
             continue;
         }
 
+        // add the HLT path to the list of HLT paths processed during this run
         runHLTPaths_.push_back(hltPath);
 
+        // create the HLT filter pass histogram
         if ( ! histStore_.contains(hltPath) ) {
-            shared_ptr<HLTFilterPassHistogram> hist = make_shared<HLTFilterPassHistogram>(hltPath, hltConfig_.moduleLabels(hltPath));
+            shared_ptr<HLTFilterPassHistogram> hist = make_shared<HLTFilterPassHistogram>(
+                hltPath,
+                hltConfig_.moduleLabels(hltPath)
+            );
             hist->SetFilterNamesSaveTags(hltConfig_.saveTagsModules(hltPath));
             histStore_.put(hltPath, hist);
         }
@@ -131,16 +123,16 @@ void HLTFilterPassAnalyzer::beginRun(const Run& run, const EventSetup& setup) {
 }
 
 
-void HLTFilterPassAnalyzer::endRun(const Run& run, const EventSetup& setup) {}
-
-
 void HLTFilterPassAnalyzer::analyze(const Event& event, const EventSetup& setup) {
+
+    // get the trigger results for this event
     Handle<TriggerResults> triggerResults;
-    Handle<PackedTriggerPrescales> triggerPrescales;
-
     event.getByToken(triggerResults_, triggerResults);
-    event.getByToken(triggerPrescales_, triggerPrescales);
 
+    // analyzer each HLT path selected in the config:
+    // - read out the name of the last running filter
+    // - read out the status of the last running filter (Ready, Exception, Fail, Pass)
+    // - fill the filter pass histogram for this event
     for (const string& hltPath : runHLTPaths_) {
         unsigned int hltPathIndex = hltConfig_.triggerIndex(hltPath);
         string lastFilter = hltConfig_.moduleLabel(hltPathIndex, (*triggerResults).index(hltPathIndex));
@@ -152,10 +144,22 @@ void HLTFilterPassAnalyzer::analyze(const Event& event, const EventSetup& setup)
 }
 
 
-bool HLTFilterPassAnalyzer::isSelectedHLTPath(const string& path) {
+void HLTFilterPassAnalyzer::endJob() {
+
+    for (HLTHistogramStore::StoreIterator it = histStore_.begin(); it != histStore_.end(); ++it) {
+        shared_ptr<HLTFilterPassHistogram> h = *it;
+        fs_->make<TH1D>(h->getTH1D());
+        fs_->make<TH1D>(h->getTH1DSaveTags());
+    }
+}
+
+
+const bool HLTFilterPassAnalyzer::isSelectedHLTPath(const string& path) {
     for (const string& selPath : hltPathsSelected_) {
-        char buffer[512];
-        snprintf(buffer, 512, "^%s_v\\d+$", selPath.c_str());
+        // the selected HLT path name can differ from the actual name by a version suffix
+        // make a regex matching in order to identify whether we have a selected HLT path here
+        char buffer[1024];
+        snprintf(buffer, 1024, "^%s_v\\d+$", selPath.c_str());
         string selPathPattern(buffer);
         regex selPathRegex(selPathPattern);
         smatch match;
@@ -163,8 +167,21 @@ bool HLTFilterPassAnalyzer::isSelectedHLTPath(const string& path) {
             return true;
         }
     }
+
+    // if no match has been found, this HLT path is not in the list of selected HLT paths
     return false;
 }
+
+
+//
+// dummy implementations of EDAnalyzer methods that are not used
+//
+
+
+void HLTFilterPassAnalyzer::beginJob() {}
+
+
+void HLTFilterPassAnalyzer::endRun(const Run& run, const EventSetup& setup) {}
 
 
 //define this as a plug-in
