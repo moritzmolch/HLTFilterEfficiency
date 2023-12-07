@@ -12,7 +12,7 @@
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ServiceRegistry"/>
 <use name="HLTrigger/HLTcore"/>
-<use name="TauAnalysis/HLTFilterEfficiency"/>
+<use name="TauAnalysis/HLTFilterEfficiencyStudies"/>
 <library file="HLTFilterPassAnalyzer.cc" name="HLTFilterPassAnalyzer">
   <flags EDM_PLUGIN="1"/>
 </library>
