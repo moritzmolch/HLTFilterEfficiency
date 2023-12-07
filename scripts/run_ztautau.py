@@ -10,7 +10,7 @@ SAMPLE_DATABASE_PATH = os.path.abspath(os.path.join(__file__, "..", "..", "data"
 OUTPUT_PATH = os.path.abspath(os.path.join(__file__, "..", "..", "store", "HLTFilterPassAnalyzer"))
 
 
-N_FILES = 10
+N_FILES = 50
 
 
 HLT_PATHS = {
@@ -61,7 +61,7 @@ def run(era, final_state, n_files=None):
     output_file = "file://" + output_file
     hlt_paths = ",".join(HLT_PATHS[final_state])
     p = subprocess.Popen(
-        "cmsRun ${CMSSW_BASE}/src/TauAnalysis/HLTFilterEfficiency/python/DrellYanTauTauGenFilter_HLTFilterPassAnalyzer_cfg.py inputFiles=" + input_files + " outputFile=" + output_file + " hltPaths=" + hlt_paths + " finalState=" + final_state,
+        "cmsRun ${CMSSW_BASE}/src/TauAnalysis/HLTFilterEfficiencyStudies/python/DrellYanTauTauGenFilter_HLTFilterPassAnalyzer_cfg.py inputFiles=" + input_files + " outputFile=" + output_file + " hltPaths=" + hlt_paths + " finalState=" + final_state,
         stdout=sys.stdout,
         stderr=sys.stdout,
         shell=True,

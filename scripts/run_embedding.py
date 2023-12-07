@@ -60,7 +60,7 @@ def run(era, sub_era, final_state, n_files=None):
     output_file = "file://" + output_file
     hlt_paths = ",".join(HLT_PATHS[final_state])
     p = subprocess.Popen(
-        "cmsRun ${CMSSW_BASE}/src/TauAnalysis/HLTFilterEfficiency/python/HLTFilterPassAnalyzer_cfg.py inputFiles=" + input_files + " outputFile=" + output_file + " hltPaths=" + hlt_paths,
+        "cmsRun ${CMSSW_BASE}/src/TauAnalysis/HLTFilterEfficiencyStudies/python/HLTFilterPassAnalyzer_cfg.py inputFiles=" + input_files + " outputFile=" + output_file + " hltPaths=" + hlt_paths,
         stdout=sys.stdout,
         stderr=sys.stdout,
         shell=True,
