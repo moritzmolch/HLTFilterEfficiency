@@ -285,6 +285,34 @@ const TauDecayMode DrellYanGenTauTauFilter::getTauLeptonDecayMode(const GenParti
 }
 
 
+const bool DrellYanGenTauTauFilter::passesEmbeddingDiLeptonSelection(
+    const GenParticle* zBoson
+) {
+    // stage immediately out if the input particle is not valid
+    if (abs(zBoson->pdgId()) != 23 || zBoson->numberOfDaughters() != 2) {
+        return ZDecayMode::UnknownZ;
+    }
+
+    // get the four-vectors of the leading and the trailing lepton
+    const LorentzVector& p_1 = zBoson->daughter(0);
+    const LorentzVector& p_2 = zBoson->daughter(1);
+
+    // pt of the leading lepton must be greater than 17 GeV
+    if (max(p_1.pt(), p_2.pt()) <= 17) {
+        return false;
+    }
+
+    // invariant mass of the lepton pair must be greater than 20 GeV
+    const LorentzVector& p_dilep = p_1 + p_2;
+    if (p_dilep.mass() <= 20) {
+        return false;
+    }
+
+    // if the selections above are passed, return that this event is selected
+    return true;
+}
+
+
 bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
 
     Handle<GenParticleCollection> genParticles;
@@ -295,6 +323,11 @@ bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
     
     // stage out if no valid Z boson has been found
     if (!wasFound || zBoson == nullptr) {
+        return false;
+    }
+
+    // check if the event passes the embedding-like dilepton selection
+    if (!passesEmbeddingDiLeptonSelection(zBoson)) {
         return false;
     }
 
