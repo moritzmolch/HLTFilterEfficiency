@@ -55,22 +55,48 @@ class DrellYanGenTauTauFilter : public one::EDFilter<one::SharedResources> {
     private:
         bool filter(Event&, const EventSetup&) override;
         const GenParticle* getZBoson(const GenParticleCollection&, bool&);
+        const ZDecayMode getZDecayModeFromString(const string&);
         const ZDecayMode getZBosonDecayMode(const GenParticle*);
         const ZDecayMode getTauTauDecayMode(const GenParticle*);
         const TauDecayMode getTauLeptonDecayMode(const GenParticle*);
 
         EDGetTokenT<GenParticleCollection> genParticles_;
-        string finalState_;
+        string finalStateName_;
+        ZDecayMode finalState_;
 };
 
 
 DrellYanGenTauTauFilter::DrellYanGenTauTauFilter(const ParameterSet& iConfig) {
     genParticles_ = consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genparticles"));
-    finalState_ = iConfig.getUntrackedParameter<string>("finalState", finalState_);
+    finalStateName_ = iConfig.getUntrackedParameter<string>("finalState", finalStateName_);
+    finalState_ = getZDecayModeFromString(finalStateName_);
 }
 
 
 DrellYanGenTauTauFilter::~DrellYanGenTauTauFilter() {}
+
+
+const ZDecayMode DrellYanGenTauTauFilter::getZDecayModeFromString(const string& zDecayModeName) {
+    if (zDecayModeName == "ElElPrompt") {
+        return ZDecayMode::ElElPrompt;
+    } else if (zDecayModeName == "MuMuPrompt") {
+        return ZDecayMode::MuMuPrompt;
+    } else if (zDecayModeName == "ElEl") {
+        return ZDecayMode::ElEl;
+    } else if (zDecayModeName == "MuMu") {
+        return ZDecayMode::MuMu;
+    } else if (zDecayModeName == "ElMu") {
+        return ZDecayMode::ElMu;
+    } else if (zDecayModeName == "ElTauHad") {
+        return ZDecayMode::ElTauHad;
+    } else if (zDecayModeName == "MuTauHad") {
+        return ZDecayMode::MuTauHad;
+    } else if (zDecayModeName == "TauHadTauHad") {
+        return ZDecayMode::TauHadTauHad;
+    }
+            
+    throw invalid_argument("Z decay mode not known");
+}
 
 
 const GenParticle* DrellYanGenTauTauFilter::getZBoson(
@@ -165,17 +191,17 @@ const ZDecayMode DrellYanGenTauTauFilter::getTauTauDecayMode(
         
         if ((decayModes.at(i) == TauDecayMode::UnknownTau) || (decayModes.at(j) == TauDecayMode::UnknownTau)) {
             return ZDecayMode::UnknownZ;
-        } else if (decayModes.at(i) == TauDecayMode::El && decayModes.at(j) == TauDecayMode::El) {
+        } else if ((decayModes.at(i) == TauDecayMode::El) && (decayModes.at(j) == TauDecayMode::El)) {
             return ZDecayMode::ElEl;
-        } else if (decayModes.at(i) == TauDecayMode::Mu && decayModes.at(j) == TauDecayMode::Mu) {
+        } else if ((decayModes.at(i) == TauDecayMode::Mu) && (decayModes.at(j) == TauDecayMode::Mu)) {
             return ZDecayMode::MuMu;
-        } else if (decayModes.at(i) == TauDecayMode::El && decayModes.at(j) == TauDecayMode::Mu) {
+        } else if ((decayModes.at(i) == TauDecayMode::El) && (decayModes.at(j) == TauDecayMode::Mu)) {
             return ZDecayMode::ElMu;
-        } else if (decayModes.at(i) == TauDecayMode::El && decayModes.at(j) == TauDecayMode::TauHad) {
+        } else if ((decayModes.at(i) == TauDecayMode::El) && (decayModes.at(j) == TauDecayMode::TauHad)) {
             return ZDecayMode::ElTauHad;
-        } else if (decayModes.at(i) == TauDecayMode::Mu && decayModes.at(j) == TauDecayMode::TauHad) {
+        } else if ((decayModes.at(i) == TauDecayMode::Mu) && (decayModes.at(j) == TauDecayMode::TauHad)) {
             return ZDecayMode::MuTauHad;
-        } else if (decayModes.at(i) == TauDecayMode::TauHad && decayModes.at(j) == TauDecayMode::TauHad) {
+        } else if ((decayModes.at(i) == TauDecayMode::TauHad) && (decayModes.at(j) == TauDecayMode::TauHad)) {
             return ZDecayMode::TauHadTauHad;
         }
     }
@@ -221,8 +247,6 @@ const TauDecayMode DrellYanGenTauTauFilter::getTauLeptonDecayMode(const GenParti
         throw invalid_argument(buffer);
     }
 
-    // here, tauLepton is the last copy of a tau lepton that decays into leptons or hadrons
-
     // counters for daughter particles
     int nEl = 0; // number of electrons
     int nMu = 0; // number of muons
@@ -233,17 +257,16 @@ const TauDecayMode DrellYanGenTauTauFilter::getTauLeptonDecayMode(const GenParti
     // iterate through the daughters of the tau lepton and increase counters
     for (unsigned int i = 0; i < tauLepton->numberOfDaughters(); ++i) {
         const Candidate* daughter = tauLepton->daughter(i);
-        switch (abs(daughter->pdgId())) {
-            case 11: 
-                nEl += 1;
-            case 12:
-                nNuEl += 1;
-            case 13:
-                nMu += 1;
-            case 14:
-                nNuMu += 1;
-            case 16:
-                nNuTau += 1;
+        if (abs(daughter->pdgId()) == 11) { 
+            nEl += 1;
+        } else if (abs(daughter->pdgId()) == 12) {
+            nNuEl += 1;
+        } else if (abs(daughter->pdgId()) == 13) {
+            nMu += 1;
+        } else if (abs(daughter->pdgId()) == 14) {
+            nNuMu += 1;
+        } else if (abs(daughter->pdgId()) == 16) {
+            nNuTau += 1;
         }
     }
 
@@ -253,10 +276,10 @@ const TauDecayMode DrellYanGenTauTauFilter::getTauLeptonDecayMode(const GenParti
         return TauDecayMode::El;
     } else if ((nEl == 0) && (nMu == 1) && (nNuEl == 0) && (nNuMu == 1) && (nNuTau == 1)) {
         return TauDecayMode::Mu;
-    } else if ((nEl == 0) && (nMu == 0) && (nNuEl == 0) && (nNuMu == 1) && (nNuTau == 1)) {
+    } else if ((nEl == 0) && (nMu == 0) && (nNuEl == 0) && (nNuMu == 0) && (nNuTau == 1)) {
         return TauDecayMode::TauHad;
     }
-        
+
     // if no decision has been made until here, the state of the decay is undefined
     return TauDecayMode::UnknownTau;
 }
@@ -278,7 +301,7 @@ bool DrellYanGenTauTauFilter::filter(Event& event, const EventSetup& setup) {
     // get the Z boson decay mode
     const ZDecayMode zDecayMode = getZBosonDecayMode(zBoson);
 
-    return (zDecayMode == ZDecayMode::TauHadTauHad);
+    return (zDecayMode == finalState_);
 }
 
 
