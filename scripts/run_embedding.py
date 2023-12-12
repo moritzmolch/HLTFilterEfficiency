@@ -46,7 +46,7 @@ def get_filelist(era, sub_era, final_state, n_files=None):
 
     filelist = sample["filelist"]
     if n_files is not None:
-        filelist = random.sample(filelist, n_files)
+        filelist = filelist[0:n_files]
 
     return filelist
 

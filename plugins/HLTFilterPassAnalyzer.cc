@@ -90,34 +90,35 @@ void HLTFilterPassAnalyzer::beginRun(const Run& run, const EventSetup& setup) {
     // initialize the config for this run
     hltConfig_.init(run, setup, triggerResultsProcess_, changed);
 
-    // empty the old filter list, paths of different runs might have different version numbers
-    runHLTPaths_.clear();
+    if (changed) {
+        // empty the old filter list, paths of different runs might have different version numbers
+        runHLTPaths_.clear();
 
-    // get the table name and the global tag
-    string tableName = hltConfig_.tableName();
-    string globalTag = hltConfig_.globalTag();
+        // get the table name and the global tag
+        string tableName = hltConfig_.tableName();
+        string globalTag = hltConfig_.globalTag();
 
-    // loop through all trigger paths and process paths that have been selected in the python config file
-    vector<string> hltPathsConfig = hltConfig_.triggerNames();
-    for (const string& hltPath : hltPathsConfig) {
+        // loop through all trigger paths and process paths that have been selected in the python config file
+        vector<string> hltPathsConfig = hltConfig_.triggerNames();
+        for (const string& hltPath : hltPathsConfig) {
 
-        if (! isSelectedHLTPath(hltPath)) {
-            continue;
+            if (! isSelectedHLTPath(hltPath)) {
+                continue;
+            }
+
+            // add the HLT path to the list of HLT paths processed during this run
+            runHLTPaths_.push_back(hltPath);
+
+            // create the HLT filter pass histogram
+            if ( ! histStore_.contains(hltPath) ) {
+                shared_ptr<HLTFilterPassHistogram> hist = make_shared<HLTFilterPassHistogram>(
+                    hltPath,
+                    hltConfig_.moduleLabels(hltPath)
+                );
+                hist->SetFilterNamesSaveTags(hltConfig_.saveTagsModules(hltPath));
+                histStore_.put(hltPath, hist);
+            }
         }
-
-        // add the HLT path to the list of HLT paths processed during this run
-        runHLTPaths_.push_back(hltPath);
-
-        // create the HLT filter pass histogram
-        if ( ! histStore_.contains(hltPath) ) {
-            shared_ptr<HLTFilterPassHistogram> hist = make_shared<HLTFilterPassHistogram>(
-                hltPath,
-                hltConfig_.moduleLabels(hltPath)
-            );
-            hist->SetFilterNamesSaveTags(hltConfig_.saveTagsModules(hltPath));
-            histStore_.put(hltPath, hist);
-        }
-
     }
 
 }
