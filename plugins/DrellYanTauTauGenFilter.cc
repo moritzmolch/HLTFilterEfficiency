@@ -24,7 +24,6 @@ using namespace edm;
 using namespace std;
 using namespace reco;
 
-
 enum ZDecayMode {
     UnknownZ,
     ElElPrompt,
@@ -59,6 +58,7 @@ class DrellYanGenTauTauFilter : public one::EDFilter<one::SharedResources> {
         const ZDecayMode getZBosonDecayMode(const GenParticle*);
         const ZDecayMode getTauTauDecayMode(const GenParticle*);
         const TauDecayMode getTauLeptonDecayMode(const GenParticle*);
+        const bool passesEmbeddingDiLeptonSelection(const GenParticle*);
 
         EDGetTokenT<GenParticleCollection> genParticles_;
         string finalStateName_;
@@ -294,8 +294,8 @@ const bool DrellYanGenTauTauFilter::passesEmbeddingDiLeptonSelection(
     }
 
     // get the four-vectors of the leading and the trailing lepton
-    const LorentzVector& p_1 = zBoson->daughter(0);
-    const LorentzVector& p_2 = zBoson->daughter(1);
+    const reco::Candidate::LorentzVector& p_1 = zBoson->daughter(0)->p4();
+    const reco::Candidate::LorentzVector& p_2 = zBoson->daughter(1)->p4();
 
     // pt of the leading lepton must be greater than 17 GeV
     if (max(p_1.pt(), p_2.pt()) <= 17) {
@@ -303,7 +303,7 @@ const bool DrellYanGenTauTauFilter::passesEmbeddingDiLeptonSelection(
     }
 
     // invariant mass of the lepton pair must be greater than 20 GeV
-    const LorentzVector& p_dilep = p_1 + p_2;
+    const reco::Candidate::LorentzVector& p_dilep = p_1 + p_2;
     if (p_dilep.mass() <= 20) {
         return false;
     }
