@@ -13,10 +13,19 @@
 <use name="FWCore/ServiceRegistry"/>
 <use name="HLTrigger/HLTcore"/>
 <use name="TauAnalysis/HLTFilterEfficiencyStudies"/>
-<library file="HLTFilterPassAnalyzer.cc" name="HLTFilterPassAnalyzer">
+<library file="TauTriggerNtuplizer.cc" name="TauTriggerNtuplizer">
   <flags EDM_PLUGIN="1"/>
 </library>
-<library file="DrellYanTauTauGenFilter.cc" name="DrellYanTauTauGenFilter">
+<library file="GenHZGammaToLLFilter.cc" name="GenHZGammaToLLFilter">
+  <flags EDM_PLUGIN="1"/>
+</library>
+<library file="GenHZGammaToLLProducer.cc" name="GenHZGammaToLLProducer">
+  <flags EDM_PLUGIN="1"/>
+</library>
+<library file="RecoTauTauPairProducer.cc" name="RecoTauTauPairProducer">
+  <flags EDM_PLUGIN="1"/>
+</library>
+<library file="RecoTauTauPairFilter.cc" name="RecoTauTauPairFilter">
   <flags EDM_PLUGIN="1"/>
 </library>
 

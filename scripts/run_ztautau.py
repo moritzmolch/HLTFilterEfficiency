@@ -6,8 +6,12 @@ import sys
 import yaml
 
 
-SAMPLE_DATABASE_PATH = os.path.abspath(os.path.join(__file__, "..", "..", "data", "sample_database_miniaod"))
-OUTPUT_PATH = os.path.abspath(os.path.join(__file__, "..", "..", "store", "HLTFilterPassAnalyzer"))
+SAMPLE_DATABASE_PATH = os.path.abspath(
+    os.path.join(__file__, "..", "..", "data", "sample_database_miniaod")
+)
+OUTPUT_PATH = os.path.abspath(
+    os.path.join(__file__, "..", "..", "store", "HLTFilterPassAnalyzer")
+)
 
 
 N_FILES = 100
@@ -36,12 +40,9 @@ HLT_PATHS = {
 
 
 def get_filelist(era, n_files=None):
-    sample_file = list(glob.glob(os.path.join(
-        SAMPLE_DATABASE_PATH,
-        era,
-        "dyjets",
-        "*.yaml"
-    )))[0]
+    sample_file = list(
+        glob.glob(os.path.join(SAMPLE_DATABASE_PATH, era, "dyjets", "*.yaml"))
+    )[0]
     with open(sample_file, mode="r") as f:
         sample = yaml.safe_load(f)
 
@@ -53,15 +54,20 @@ def get_filelist(era, n_files=None):
 
 
 def run(era, final_state, n_files=None):
-    filelist = get_filelist(era, n_files=n_files)
+    filelist = get_filelist(era, n_files=n_files)[0:1]
     input_files = ",".join(filelist)
-    output_file = os.path.join(OUTPUT_PATH, "ZTauTau-" + final_state + "FinalState_Run" + era + ".root")
+    output_file = os.path.join(
+        OUTPUT_PATH, "ZTauTau-" + final_state + "FinalState_Run" + era + ".root"
+    )
     if not os.path.exists(os.path.dirname(output_file)):
         os.makedirs(os.path.dirname(output_file))
     output_file = "file://" + output_file
     hlt_paths = ",".join(HLT_PATHS[final_state])
     p = subprocess.Popen(
-        "cmsRun ${CMSSW_BASE}/src/TauAnalysis/HLTFilterEfficiencyStudies/python/DrellYanTauTauGenFilter_HLTFilterPassAnalyzer_cfg.py inputFiles=" + input_files + " outputFile=" + output_file + " hltPaths=" + hlt_paths + " finalState=" + final_state.replace("Tau", "TauHad"),
+        "cmsRun ${CMSSW_BASE}/src/TauAnalysis/HLTFilterEfficiencyStudies/python/TauTriggerNtuplizerMC_cfg.py inputFiles="
+        + input_files
+        + " outputFile="
+        + output_file,
         stdout=sys.stdout,
         stderr=sys.stdout,
         shell=True,
@@ -72,6 +78,8 @@ def run(era, final_state, n_files=None):
 
 
 for final_state in ["TauTau", "ElTau", "MuTau"]:
-
-    for era in ["2017", ]:
+    for era in [
+        "2017",
+    ]:
         run(era, final_state, n_files=N_FILES)
+        break
