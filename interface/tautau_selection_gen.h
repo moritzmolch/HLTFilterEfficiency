@@ -38,13 +38,22 @@ enum TauFinalState {
 const GenParticle& getHZGammaBoson(const vector<GenParticle>&);
 
 
+const bool setPairLeptons(const vector<GenParticle>&, const int&, GenParticle&, GenParticle&); 
+
+
 const pair<GenParticle, GenParticle> getHZGammaLeptonPair(const GenParticle&, const int&);
 
 
 const TauFinalState getTauFinalState(const GenParticle&);
 
 
+const HZGammaFinalState getDileptonFinalState(const GenParticle&, const GenParticle&);
+
+
 const HZGammaFinalState getHZGammaFinalState(const GenParticle&);
+
+
+const vector<GenParticle> getDirectDaughters(const GenParticle&);
 
 
 }; // end namespace tautau_selection_gen

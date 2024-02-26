@@ -31,9 +31,7 @@ tauTriggerNtuplizer = cms.EDAnalyzer(
     pairElectrons=cms.InputTag("recoTauTauPairProducer", "pairElectrons"),
     pairMuons=cms.InputTag("recoTauTauPairProducer", "pairMuons"),
     pairTaus=cms.InputTag("recoTauTauPairProducer", "pairTaus"),
-    slimmedGenParticles=cms.InputTag(
-        "prunedGenParticles", "", "PAT"
-    ),  # dummy value, not used during ntuple production
+    tauTauGenParticles=cms.InputTag("tauTauGenParticlesProducer", "tauTauGenParticles"),
     triggerResults=cms.InputTag("TriggerResults", "", "SIMembeddingHLT"),
     triggerObjects=cms.InputTag("patTriggerUnpacker"),
     generator=cms.InputTag("generator"),

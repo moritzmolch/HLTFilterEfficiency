@@ -5,14 +5,18 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 # define command-line options
 options = VarParsing.VarParsing("analysis")
 options.register(
-    "hltPaths",
+    "era",
     [],
-    VarParsing.VarParsing.multiplicity.list,
+    VarParsing.VarParsing.multiplicity.singleton,
     VarParsing.VarParsing.varType.string,
-    "Names of the high-level trigger paths that are studied",
+    "the data-taking era",
 )
 
 options.parseArguments()
+
+era = options.era
+if era not in ["2016preVFP", "2016postVFP", "2017", "2018"]:
+    raise Exception("unknown era '{}'".format(era))
 
 # break if the list of input files is too long
 if len(options.inputFiles) > 255:
@@ -56,14 +60,19 @@ tauIdEmbedder = tauIdConfig.TauIDEmbedder(
 )
 tauIdEmbedder.runTauID()
 
+# ntuplizer for writing out all generator weights
+process.load("TauAnalysis.HLTFilterEfficiencyStudies.GenWeightNtuplizer_cff")
+
 # gen-level filter for tau tau pairs from DY production
-process.load("TauAnalysis.HLTFilterEfficiencyStudies.GenHZGammaToLLFilter_cff")
+process.load("TauAnalysis.HLTFilterEfficiencyStudies.TauTauGenParticlesFilter_cff")
 
 # reconstruction-level filter for tau tau pairs
 process.load("TauAnalysis.HLTFilterEfficiencyStudies.RecoTauTauPairFilter_cff")
 
 # the ntuplizer plugin
-process.load("TauAnalysis.HLTFilterEfficiencyStudies.TauTriggerNtuplizerMC_cff")
+process.load(
+    "TauAnalysis.HLTFilterEfficiencyStudies.TauTriggerNtuplizerMC_{}_cff".format(era)
+)
 
 # service that provides the output file
 process.TFileService = cms.Service(
@@ -74,8 +83,9 @@ process.TFileService = cms.Service(
 
 # process path
 process.p = cms.Path(
-    process.rerunMvaIsolationSequence * getattr(process, updatedTauName)
-    + process.genHZGammaToLLFilterSequence
+    process.genWeightNtuplizer
+    + process.tauTauGenParticlesFilterSequence
+    + process.rerunMvaIsolationSequence * getattr(process, updatedTauName)
     + process.recoTauTauPairFilterSequence
     + process.tauTriggerNtuplizerSequence
 )

@@ -58,7 +58,7 @@ class TauTriggerNtuplizer: public one::EDAnalyzer<one::WatchRuns, one::SharedRes
         EDGetTokenT<vector<Electron>> pairElectrons_;
         EDGetTokenT<vector<Muon>> pairMuons_;
         EDGetTokenT<vector<Tau>> pairTaus_;
-        EDGetTokenT<vector<reco::GenParticle>> slimmedGenParticles_;
+        EDGetTokenT<vector<reco::GenParticle>> tauTauGenParticles_;
 
         EDGetTokenT<GenEventInfoProduct> genEvtInfo_;
         vector<string> hltPathList_;
@@ -133,7 +133,7 @@ TauTriggerNtuplizer::TauTriggerNtuplizer(const ParameterSet& iConfig) {
     pairElectrons_ = consumes<vector<Electron>>(iConfig.getParameter<InputTag>("pairElectrons"));
     pairMuons_ = consumes<vector<Muon>>(iConfig.getParameter<InputTag>("pairMuons"));
     pairTaus_ = consumes<vector<Tau>>(iConfig.getParameter<InputTag>("pairTaus"));
-    slimmedGenParticles_ = mayConsume<vector<reco::GenParticle>>(iConfig.getParameter<InputTag>("slimmedGenParticles"));
+    tauTauGenParticles_ = consumes<vector<reco::GenParticle>>(iConfig.getParameter<InputTag>("tauTauGenParticles"));
 
     hltPathList_ = iConfig.getUntrackedParameter<vector<string>>("hltPathList", hltPathList_);
     triggerResultsProcess_ = iConfig.getParameter<InputTag>("triggerResults").process();
@@ -355,10 +355,10 @@ void TauTriggerNtuplizer::analyze(const Event& event, const EventSetup& setup) {
     genParticleCharge_.clear();
     genParticlePdgId_.clear();
 
-    if (isMC_) {
-        Handle<vector<reco::GenParticle>> slimmedGenParticles;
-        event.getByToken(slimmedGenParticles_, slimmedGenParticles);
-        for (const reco::GenParticle& genParticle : *slimmedGenParticles) {
+    if (isMC_ || isEmb_) {
+        Handle<vector<reco::GenParticle>> tauTauGenParticles;
+        event.getByToken(tauTauGenParticles_, tauTauGenParticles);
+        for (const reco::GenParticle& genParticle : *tauTauGenParticles) {
             genParticlePt_.push_back(genParticle.pt());
             genParticleEta_.push_back(genParticle.eta());
             genParticlePhi_.push_back(genParticle.phi());

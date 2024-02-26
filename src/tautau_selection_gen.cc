@@ -36,6 +36,30 @@ const GenParticle& getHZGammaBoson(const vector<GenParticle>& genParticles) {
 }
 
 
+const bool setPairLeptons(const vector<GenParticle>& genParticles, const int& pdgIdLepton, GenParticle& lepton1, GenParticle& lepton2) {
+
+    vector<GenParticle> leptons = vector<GenParticle>();
+    for (const GenParticle& genParticle : genParticles) {
+        const GenStatusFlags statusFlags = genParticle.statusFlags();
+        if (
+            (abs(genParticle.pdgId()) == pdgIdLepton) &&
+            (statusFlags.isHardProcess()) &&
+            (statusFlags.isFirstCopy())
+        ) {
+            leptons.push_back(genParticle);
+        }
+    }
+
+    if (leptons.size() == 2 && (leptons.at(0).charge() * leptons.at(1).charge() == -1)) {
+        lepton1 = leptons.at(0);
+        lepton2 = leptons.at(1);
+        return true;
+    }
+
+    return false;
+}
+
+
 const pair<GenParticle, GenParticle> getHZGammaLeptonPair(const GenParticle& motherParticle, const int& pdgIdLepton) {
     int pdgId = abs(motherParticle.pdgId());
     if ((pdgId != 22) && (pdgId != 23) && (pdgId != 25)) {
@@ -126,6 +150,76 @@ const TauFinalState getTauFinalState(const GenParticle& motherParticle) {
 }
 
 
+const HZGammaFinalState getDileptonFinalState(const GenParticle& lepton1, const GenParticle& lepton2) {
+    int nEle = 0;
+    int nMu = 0;
+    int nTau = 0;
+
+    vector<GenParticle> leptons = vector<GenParticle>({lepton1, lepton2});
+
+    for (const GenParticle& lepton : leptons) {
+        int pdgId = abs(lepton.pdgId());
+        if (pdgId == 11) {
+            nEle++;
+        } else if (pdgId == 13) {
+            nMu++;
+        } else if (pdgId == 15) {
+            nTau++;
+        }
+    }
+
+    // get Z -> ee and Z -> mu mu decays
+    if ((nEle == 2) && (nMu == 0) && (nTau == 0)) {
+        return HZGammaFinalState::eePrompt;
+    } 
+    if ((nEle == 0) && (nMu == 2) && (nTau == 0)) {
+        return HZGammaFinalState::mmPrompt;
+    }
+
+    // further examine Z -> tautau decays
+    pair<GenParticle, GenParticle> tauTauPair = pair<GenParticle, GenParticle>({lepton1, lepton2});
+    const TauFinalState tauFinalState1 = getTauFinalState(tauTauPair.first);
+    const TauFinalState tauFinalState2 = getTauFinalState(tauTauPair.second);
+    vector<TauFinalState> tauFinalStates = vector<TauFinalState>({tauFinalState1, tauFinalState2});
+
+    vector<pair<size_t, size_t>> indexPairs = vector<pair<size_t, size_t>>({
+        pair<size_t, size_t>({0, 1}),
+        pair<size_t, size_t>({1, 0})
+    });
+    for (size_t i = 0; i < indexPairs.size(); ++i) {
+
+        size_t i1 = indexPairs[i].first;
+        size_t i2 = indexPairs[i].second;
+
+        if ((tauFinalStates[i1] == TauFinalState::tauToUnknown) || (tauFinalStates[i2] == TauFinalState::tauToUnknown)) {
+            return HZGammaFinalState::unknown;
+        }
+        if ((tauFinalStates[i1] == TauFinalState::tauToE) || (tauFinalStates[i2] == TauFinalState::tauToT)) {
+            return HZGammaFinalState::et;
+        }
+        if ((tauFinalStates[i1] == TauFinalState::tauToM) || (tauFinalStates[i2] == TauFinalState::tauToT)) {
+            return HZGammaFinalState::mt;
+        }
+        if ((tauFinalStates[i1] == TauFinalState::tauToT) || (tauFinalStates[i2] == TauFinalState::tauToT)) {
+            return HZGammaFinalState::tt;
+        }
+        if ((tauFinalStates[i1] == TauFinalState::tauToE) || (tauFinalStates[i2] == TauFinalState::tauToE)) {
+            return HZGammaFinalState::ee;
+        }
+        if ((tauFinalStates[i1] == TauFinalState::tauToM) || (tauFinalStates[i2] == TauFinalState::tauToM)) {
+            return HZGammaFinalState::mm;
+        }
+        if ((tauFinalStates[i1] == TauFinalState::tauToE) || (tauFinalStates[i2] == TauFinalState::tauToM)) {
+            return HZGammaFinalState::em;
+        }
+
+    }
+
+    // if all decisions have been false up to here, the decay mode is not known
+    return HZGammaFinalState::unknown;
+}
+
+
 const HZGammaFinalState getHZGammaFinalState(const GenParticle& motherParticle) {
     int pdgId = abs(motherParticle.pdgId());
     if ((pdgId != 22) && (pdgId != 23) && (pdgId != 25)) {
@@ -197,6 +291,30 @@ const HZGammaFinalState getHZGammaFinalState(const GenParticle& motherParticle) 
 
     // if all decisions have been false up to here, the decay mode is not known
     return HZGammaFinalState::unknown;
+}
+
+
+const vector<GenParticle> getDirectDaughters(const GenParticle& motherParticle) {
+
+    if (!(motherParticle.isLastCopy())) {
+        for (unsigned int i = 0; i < motherParticle.numberOfDaughters(); ++i) {
+            const Candidate* daughter = motherParticle.daughter(i);
+            const GenParticle* genDaughter = dynamic_cast<const GenParticle*>(daughter);
+            if (abs(genDaughter->pdgId()) != abs(motherParticle.pdgId())) {
+                continue;
+            }
+            return getDirectDaughters(*genDaughter);
+        }
+    }
+
+    vector<GenParticle> daughters = vector<GenParticle>();
+    for (unsigned int i = 0; i < motherParticle.numberOfDaughters(); ++i) {
+        const Candidate* daughter = motherParticle.daughter(i);
+        const GenParticle* genDaughter = dynamic_cast<const GenParticle*>(daughter);
+        daughters.push_back(*genDaughter);
+    }
+
+    return daughters;
 }
 
 

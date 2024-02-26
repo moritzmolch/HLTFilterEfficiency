@@ -13,19 +13,21 @@
 <use name="FWCore/ServiceRegistry"/>
 <use name="HLTrigger/HLTcore"/>
 <use name="TauAnalysis/HLTFilterEfficiencyStudies"/>
-<library file="TauTriggerNtuplizer.cc" name="TauTriggerNtuplizer">
-  <flags EDM_PLUGIN="1"/>
-</library>
-<library file="GenHZGammaToLLFilter.cc" name="GenHZGammaToLLFilter">
-  <flags EDM_PLUGIN="1"/>
-</library>
-<library file="GenHZGammaToLLProducer.cc" name="GenHZGammaToLLProducer">
-  <flags EDM_PLUGIN="1"/>
-</library>
-<library file="RecoTauTauPairProducer.cc" name="RecoTauTauPairProducer">
+<library file="GenWeightNtuplizer.cc" name="GenWeightNtuplizer">
   <flags EDM_PLUGIN="1"/>
 </library>
 <library file="RecoTauTauPairFilter.cc" name="RecoTauTauPairFilter">
   <flags EDM_PLUGIN="1"/>
 </library>
-
+<library file="RecoTauTauPairProducer.cc" name="RecoTauTauPairProducer">
+  <flags EDM_PLUGIN="1"/>
+</library>
+<library file="TauTauGenParticlesFilter.cc" name="TauTauGenParticlesFilter">
+  <flags EDM_PLUGIN="1"/>
+</library>
+<library file="TauTauGenParticlesProducer.cc" name="TauTauGenParticlesProducer">
+  <flags EDM_PLUGIN="1"/>
+</library>
+<library file="TauTriggerNtuplizer.cc" name="TauTriggerNtuplizer">
+  <flags EDM_PLUGIN="1"/>
+</library>

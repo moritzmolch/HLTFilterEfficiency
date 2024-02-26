@@ -85,7 +85,7 @@ slimmedTausForTauTauPair = cms.EDFilter(
     "PATTauSelector",
     src=cms.InputTag("slimmedTausWithDeepTau2p1"),
     cut=cms.string(
-        "(pt > 20) && (eta < 2.4)"
+        "(pt > 20) && (eta < 2.5)"
         + " && ((decayMode == 0) || (decayMode == 1) || (decayMode == 10) || (decayMode == 11))"
         + ' && (tauID("byVVLooseDeepTau2017v2p1VSe") > 0.5)'
         + ' && (tauID("byVLooseDeepTau2017v2p1VSmu") > 0.5)'
