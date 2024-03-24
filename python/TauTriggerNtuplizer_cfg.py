@@ -5,18 +5,28 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 # define command-line options
 options = VarParsing.VarParsing("analysis")
 options.register(
-    "era",
+    "datasetType",
     [],
     VarParsing.VarParsing.multiplicity.singleton,
     VarParsing.VarParsing.varType.string,
-    "the data-taking era",
+    "dataset type of the processed file, i.e. if it is a file from an embedding or a MC simulation dataset; possible values are 'emb' and 'mc'",
+)
+options.register(
+    "hltPaths",
+    [],
+    VarParsing.VarParsing.multiplicity.list,
+    VarParsing.VarParsing.varType.string,
+    "list of HLT paths, which are regarded when processing these events",
 )
 
+# parse and validate the arguments
 options.parseArguments()
 
-era = options.era
-if era not in ["2016preVFP", "2016postVFP", "2017", "2018"]:
-    raise Exception("unknown era '{}'".format(era))
+dataset_type = options.datasetType
+if dataset_type not in ["emb", "mc"]:
+    raise ValueError("dataset type '{}' unknown; must be 'emb' or 'mc'".format(dataset_type))
+
+hlt_paths = options.hltPaths
 
 # break if the list of input files is too long
 if len(options.inputFiles) > 255:
@@ -25,7 +35,11 @@ if len(options.inputFiles) > 255:
     )
 
 # define the process
-process = cms.Process("TauTriggerNtuplizerMC")
+process = None
+if dataset_type == "emb":
+    process = cms.Process("TauTriggerNtuplizerEmbedding")
+elif dataset_type == "mc":
+    process = cms.Process("TauTriggerNtuplizerMC")
 
 # number of events being processed
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -70,15 +84,18 @@ process.load("TauAnalysis.HLTFilterEfficiencyStudies.TauTauGenParticlesFilter_cf
 process.load("TauAnalysis.HLTFilterEfficiencyStudies.RecoTauTauPairFilter_cff")
 
 # the ntuplizer plugin
-process.load(
-    "TauAnalysis.HLTFilterEfficiencyStudies.TauTriggerNtuplizerMC_{}_cff".format(era)
-)
+if dataset_type == "emb":
+    process.load("TauAnalysis.HLTFilterEfficiencyStudies.TauTriggerNtuplizerEmbedding_cff")
+elif dataset_type == "mc":
+    process.load("TauAnalysis.HLTFilterEfficiencyStudies.TauTriggerNtuplizerMC_cff")
+
+# initialize the HLT path argument of the ntuplizer correctly
+process.tauTriggerNtuplizer.hltPathList = cms.untracked.vstring(hlt_paths)
 
 # service that provides the output file
 process.TFileService = cms.Service(
     "TFileService",
     fileName=cms.string(options.outputFile),
-    name=cms.string("TauTriggerNtuple"),
 )
 
 # process path
