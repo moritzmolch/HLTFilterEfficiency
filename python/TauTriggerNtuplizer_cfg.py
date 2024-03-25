@@ -75,19 +75,19 @@ tauIdEmbedder = tauIdConfig.TauIDEmbedder(
 tauIdEmbedder.runTauID()
 
 # ntuplizer for writing out all generator weights
-process.load("TauAnalysis.HLTFilterEfficiencyStudies.GenWeightNtuplizer_cff")
+process.load("TauAnalysis.TauTriggerNtuples.GenWeightNtuplizer_cff")
 
 # gen-level filter for tau tau pairs from DY production
-process.load("TauAnalysis.HLTFilterEfficiencyStudies.TauTauGenParticlesFilter_cff")
+process.load("TauAnalysis.TauTriggerNtuples.TauTauGenParticlesFilter_cff")
 
 # reconstruction-level filter for tau tau pairs
-process.load("TauAnalysis.HLTFilterEfficiencyStudies.RecoTauTauPairFilter_cff")
+process.load("TauAnalysis.TauTriggerNtuples.RecoTauTauPairFilter_cff")
 
 # the ntuplizer plugin
 if dataset_type == "emb":
-    process.load("TauAnalysis.HLTFilterEfficiencyStudies.TauTriggerNtuplizerEmbedding_cff")
+    process.load("TauAnalysis.TauTriggerNtuples.TauTriggerNtuplizerEmbedding_cff")
 elif dataset_type == "mc":
-    process.load("TauAnalysis.HLTFilterEfficiencyStudies.TauTriggerNtuplizerMC_cff")
+    process.load("TauAnalysis.TauTriggerNtuples.TauTriggerNtuplizerMC_cff")
 
 # initialize the HLT path argument of the ntuplizer correctly
 process.tauTriggerNtuplizer.hltPathList = cms.untracked.vstring(hlt_paths)

@@ -1,3 +1,0 @@
-[submodule "data/sample_database_miniaod"]
-	path = data/sample_database_miniaod
-	url = git@github.com:moritzmolch/sample_database_miniaod.git
