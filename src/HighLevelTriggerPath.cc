@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/HighLevelTriggerPath.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/HighLevelTriggerPath.h"
 
 using namespace std;
 

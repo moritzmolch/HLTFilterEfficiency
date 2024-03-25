@@ -8,7 +8,7 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/tautau_selection_gen.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/tautau_selection_gen.h"
 
 using namespace reco;
 using namespace std;

@@ -11,7 +11,7 @@
 
 #include "Math/Vector4D.h"
 
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/util.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/util.h"
 
 using namespace pat;
 using namespace ROOT::Math;

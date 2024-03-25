@@ -27,7 +27,7 @@
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/HighLevelTriggerPath.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/HighLevelTriggerPath.h"
 
 #include <TTree.h>
 

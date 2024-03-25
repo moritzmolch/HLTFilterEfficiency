@@ -17,7 +17,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/tautau_selection_gen.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/tautau_selection_gen.h"
 
 using namespace edm;
 using namespace std;

@@ -21,7 +21,7 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/EDPutToken.h"
 
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/tautau_selection_reco.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/tautau_selection_reco.h"
 
 using namespace edm;
 using namespace std;

@@ -12,7 +12,7 @@
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ServiceRegistry"/>
 <use name="HLTrigger/HLTcore"/>
-<use name="TauAnalysis/HLTFilterEfficiencyStudies"/>
+<use name="TauAnalysis/TauTriggerNtuples"/>
 <library file="GenWeightNtuplizer.cc" name="GenWeightNtuplizer">
   <flags EDM_PLUGIN="1"/>
 </library>

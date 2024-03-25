@@ -1,7 +1,7 @@
 #include <cmath>
 
 #include "Math/LorentzVector.h"
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/util.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/util.h"
 
 using namespace ROOT::Math;
 using namespace std;

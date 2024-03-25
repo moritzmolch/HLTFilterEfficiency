@@ -8,8 +8,8 @@
 
 #include "Math/Vector4D.h"
 
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/tautau_selection_reco.h"
-#include "TauAnalysis/HLTFilterEfficiencyStudies/interface/util.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/tautau_selection_reco.h"
+#include "TauAnalysis/TauTriggerNtuples/interface/util.h"
 
 using namespace pat;
 using namespace ROOT::Math;
